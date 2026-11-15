@@ -1,0 +1,350 @@
+{
+  "title": "PC-Leerlauf-Abschaltung",
+  "config": {
+    "step": {
+      "user": {
+        "title": "PC-Leerlauf-Abschaltung",
+        "description": "Gefundene HASS.Agent-Rechner ({anzahl}): {rechner}\n\nAlle Rechner werden bei Inaktivität automatisch abgeschaltet. Rechner, die trotzdem anbleiben sollen, unten auswählen. Das geht später auch je Rechner oder über Konfigurieren - Ausnahmen.",
+        "data": {
+          "inaktiv_minuten": "Inaktivitätszeit bis zur Abschaltung",
+          "warn_minuten": "Warnung vorher auf dem Rechner (0 = keine)",
+          "aktion": "Aktion",
+          "probelauf": "Probelauf (nur melden, nicht abschalten)",
+          "start_ausnahmen": "Diese Rechner bleiben an (Ausnahmen)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Ist bereits eingerichtet.",
+      "single_instance_allowed": "Ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "PC-Leerlauf-Abschaltung",
+        "menu_options": {
+          "einstellungen": "Allgemeine Einstellungen",
+          "ausnahmen": "Ausnahmen: Rechner, die anbleiben",
+          "nicht_verwaltet": "Entfernte Rechner wieder aufnehmen"
+        }
+      },
+      "einstellungen": {
+        "title": "Allgemeine Einstellungen",
+        "description": "Gilt für alle Rechner, soweit am Rechner nichts Eigenes eingestellt ist.",
+        "data": {
+          "aktiv": "Automatische Abschaltung aktiv",
+          "probelauf": "Probelauf (nur melden, nicht abschalten)",
+          "inaktiv_minuten": "Inaktivitätszeit bis zur Abschaltung",
+          "warn_minuten": "Warnung vorher auf dem Rechner (0 = keine)",
+          "aktion": "Aktion",
+          "kriterien": "Was zählt als Benutzung",
+          "cpu_schwelle": "CPU-Last, ab der der Rechner als benutzt gilt",
+          "cpu_minuten": "CPU-Mittelwert über",
+          "nach_start_minuten": "Schonzeit nach dem Hochfahren",
+          "zeit_von": "Abschalten erlaubt von",
+          "zeit_bis": "Abschalten erlaubt bis (gleich = immer)",
+          "wochentage": "An diesen Tagen",
+          "benachrichtigung": "Benachrichtigung an (z. B. notify.mobile_app_iphone, leer = keine)",
+          "neue_abschalten": "Neu erkannte Rechner automatisch abschalten"
+        }
+      },
+      "ausnahmen": {
+        "title": "Ausnahmen",
+        "description": "Ausgewählte Rechner laufen weiter, auch wenn sie die Inaktivitätszeit überschreiten.",
+        "data": {
+          "ausnahmen": "Rechner, die anbleiben"
+        }
+      },
+      "nicht_verwaltet": {
+        "title": "Entfernte Rechner",
+        "description": "Diese Rechner wurden aus der Integration entfernt und werden nicht überwacht. Ausgewählte werden wieder aufgenommen.",
+        "data": {
+          "ignoriert": "Wieder aufnehmen"
+        }
+      }
+    }
+  },
+  "config_subentries": {
+    "pc": {
+      "entry_type": "Rechner",
+      "initiate_flow": {
+        "user": "Rechner hinzufügen",
+        "reconfigure": "Rechner bearbeiten"
+      },
+      "step": {
+        "user": {
+          "title": "Rechner hinzufügen",
+          "data": {
+            "agent_unique_id": "HASS.Agent-Rechner",
+            "abschalten": "Bei Inaktivität abschalten (aus = bleibt immer an)"
+          }
+        },
+        "menu": {
+          "title": "{titel}",
+          "description": "{uebersicht}",
+          "menu_options": {
+            "einstellungen": "Einstellungen (Pause-Entität, Verknüpfung, Aktion, Zeiten)",
+            "vorlage_anwenden": "Vorlage anwenden / entfernen",
+            "bed_aktiv": "Bedingung hinzufügen: Regel aktiv, wenn …",
+            "bed_ausfuehren": "Bedingung hinzufügen: Regel ausführen, wenn …",
+            "bed_entfernen": "Bedingungen entfernen",
+            "speichern": "Speichern"
+          }
+        },
+        "einstellungen": {
+          "title": "{rechner}",
+          "data": {
+            "abschalten": "Bei Inaktivität abschalten (aus = bleibt immer an)",
+            "inaktiv_minuten": "Eigene Inaktivitätszeit (0 = global, nur ohne Ausführen-Bedingungen)",
+            "aktion": "Aktion",
+            "eigene_kriterien": "Eigene Kriterien der eingebauten Logik",
+            "kriterien": "Was zählt als Benutzung (nur bei eigenen Kriterien)",
+            "weitere_entitaeten": "Weitere Entitäten, die den Rechner anhalten (an/läuft/Zahl > 0)",
+            "aktiv_logik": "Regel aktiv, wenn …",
+            "ausfuehren_logik": "Regel ausführen, wenn …",
+            "warn_minuten": "Warnzeit vor der Aktion (-1 = global)",
+            "pause_entitaet": "Pause-Entität: Regel ruht, solange diese an/wahr ist"
+          }
+        },
+        "vorlage_anwenden": {
+          "title": "Vorlage anwenden",
+          "description": "Die Bedingungen der Vorlage werden mit den Entitäten dieses Rechners übernommen und können danach angepasst werden.",
+          "data": {
+            "vorlage": "Vorlage"
+          }
+        },
+        "bed_entitaet": {
+          "title": "{gruppe}",
+          "description": "Entität wählen (Liste vom Rechner {rechner}, mit aktuellem Wert).",
+          "data": {
+            "entitaet": "Entität"
+          }
+        },
+        "bed_fremd": {
+          "title": "Andere Entität",
+          "description": "Diese Entität gilt für alle Rechner gleich.",
+          "data": {
+            "entitaet": "Entität"
+          }
+        },
+        "bed_wert": {
+          "title": "{name}",
+          "description": "Aktueller Wert: {aktuell} (Art: {art})",
+          "data": {
+            "op": "Vergleich",
+            "wert": "Wert"
+          }
+        },
+        "bed_entfernen": {
+          "title": "Bedingungen entfernen",
+          "data": {
+            "bedingungen": "Entfernen"
+          }
+        }
+      },
+      "error": {
+        "wert_fehlt": "Für diesen Vergleich wird ein Wert gebraucht."
+      },
+      "abort": {
+        "keine_rechner": "Alle HASS.Agent-Rechner sind bereits aufgenommen.",
+        "reconfigure_successful": "Gespeichert."
+      }
+    },
+    "vorlage": {
+      "entry_type": "Vorlage",
+      "initiate_flow": {
+        "user": "Vorlage hinzufügen",
+        "reconfigure": "Vorlage bearbeiten"
+      },
+      "step": {
+        "menu": {
+          "title": "{titel}",
+          "description": "{uebersicht}",
+          "menu_options": {
+            "einstellungen": "Einstellungen (Name, Referenz-Rechner, Verknüpfung, automatisch)",
+            "anwenden": "Auf Rechner anwenden",
+            "bed_aktiv": "Bedingung hinzufügen: Regel aktiv, wenn …",
+            "bed_ausfuehren": "Bedingung hinzufügen: Regel ausführen, wenn …",
+            "bed_entfernen": "Bedingungen entfernen",
+            "speichern": "Speichern"
+          }
+        },
+        "einstellungen": {
+          "title": "Vorlage",
+          "description": "Der Referenz-Rechner liefert die Liste der Entitäten. Die Vorlage merkt sich nur die Art der Entität und passt auf jeden Rechner.",
+          "data": {
+            "name": "Name",
+            "referenz": "Referenz-Rechner",
+            "automatisch": "Automatisch auf alle Rechner ohne Vorlage anwenden (auch neue)",
+            "aktiv_logik": "Regel aktiv, wenn …",
+            "ausfuehren_logik": "Regel ausführen, wenn …",
+            "aktion": "Aktion",
+            "warn_minuten": "Warnzeit vor der Aktion (-1 = global)",
+            "pause_entitaet": "Pause-Entität: Regel ruht, solange diese an/wahr ist"
+          }
+        },
+        "anwenden": {
+          "title": "Auf Rechner anwenden",
+          "description": "Wird beim Speichern übernommen. Ausgewählte Rechner bekommen die Bedingungen dieser Vorlage, auch wenn sie angepasst waren.",
+          "data": {
+            "rechner": "Rechner"
+          }
+        },
+        "bed_entitaet": {
+          "title": "{gruppe}",
+          "description": "Entität wählen (Liste vom Rechner {rechner}, mit aktuellem Wert).",
+          "data": {
+            "entitaet": "Entität"
+          }
+        },
+        "bed_fremd": {
+          "title": "Andere Entität",
+          "description": "Diese Entität gilt für alle Rechner gleich.",
+          "data": {
+            "entitaet": "Entität"
+          }
+        },
+        "bed_wert": {
+          "title": "{name}",
+          "description": "Aktueller Wert: {aktuell} (Art: {art})",
+          "data": {
+            "op": "Vergleich",
+            "wert": "Wert"
+          }
+        },
+        "bed_entfernen": {
+          "title": "Bedingungen entfernen",
+          "data": {
+            "bedingungen": "Entfernen"
+          }
+        }
+      },
+      "error": {
+        "wert_fehlt": "Für diesen Vergleich wird ein Wert gebraucht."
+      },
+      "abort": {
+        "keine_agenten": "Es gibt noch keine HASS.Agent-Rechner.",
+        "reconfigure_successful": "Gespeichert."
+      }
+    }
+  },
+  "selector": {
+    "aktion": {
+      "options": {
+        "global": "Wie global eingestellt",
+        "shutdown": "Herunterfahren",
+        "hibernate": "Ruhezustand",
+        "sleep": "Energiesparmodus"
+      }
+    },
+    "kriterien": {
+      "options": {
+        "eingabe": "Maus/Tastatur (Leerlaufzeit)",
+        "rdp": "Offene Remotedesktop-Sitzung",
+        "cpu": "CPU-Last über Schwelle",
+        "medien": "Medienwiedergabe läuft",
+        "kamera_mikrofon": "Kamera oder Mikrofon in Benutzung",
+        "anzeige_sperre": "Programm hält die Anzeige an (Video, Präsentation)",
+        "benutzer": "Jemand angemeldet (streng: angemeldete Rechner bleiben immer an)"
+      }
+    },
+    "logik": {
+      "options": {
+        "alle": "alle Bedingungen erfüllt (UND)",
+        "eine": "eine Bedingung erfüllt (ODER)"
+      }
+    },
+    "op": {
+      "options": {
+        "ge": "≥ größer oder gleich",
+        "gt": "> größer",
+        "le": "≤ kleiner oder gleich",
+        "lt": "< kleiner",
+        "eq": "= gleich",
+        "ne": "≠ ungleich",
+        "contains": "enthält",
+        "not_contains": "enthält nicht",
+        "on": "ist an / wahr",
+        "off": "ist aus / falsch",
+        "unavailable": "ist nicht verfügbar",
+        "available": "ist verfügbar"
+      }
+    },
+    "wochentage": {
+      "options": {
+        "mon": "Montag",
+        "tue": "Dienstag",
+        "wed": "Mittwoch",
+        "thu": "Donnerstag",
+        "fri": "Freitag",
+        "sat": "Samstag",
+        "sun": "Sonntag"
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "hub_cfg_enabled": {
+        "name": "Automatische Abschaltung"
+      },
+      "hub_cfg_dry_run": {
+        "name": "Probelauf"
+      },
+      "cfg_enabled": {
+        "name": "Bei Inaktivität abschalten"
+      }
+    },
+    "number": {
+      "hub_cfg_idle_minutes": {
+        "name": "Inaktivitätszeit"
+      },
+      "hub_cfg_warn_minutes": {
+        "name": "Warnzeit"
+      },
+      "cfg_idle_minutes": {
+        "name": "Eigene Inaktivitätszeit"
+      }
+    },
+    "button": {
+      "reset_timer": {
+        "name": "Timer zurücksetzen"
+      },
+      "shutdown_now": {
+        "name": "Jetzt abschalten"
+      }
+    },
+    "binary_sensor": {
+      "in_use": {
+        "name": "In Benutzung"
+      }
+    },
+    "sensor": {
+      "hub_status": {
+        "name": "Rechner online"
+      },
+      "status": {
+        "name": "Status",
+        "state": {
+          "aktiv": "In Benutzung",
+          "inaktiv": "Inaktiv",
+          "warnung": "Wird gleich abgeschaltet",
+          "abgeschaltet": "Abgeschaltet",
+          "offline": "Offline",
+          "ausgenommen": "Bleibt an (Ausnahme)",
+          "pausiert": "Pausiert",
+          "ausserhalb_zeit": "Außerhalb der Abschaltzeit",
+          "bereit": "Regel aktiv, wartet",
+          "regel_inaktiv": "Regel nicht aktiv",
+          "regel_pausiert": "Regel pausiert"
+        }
+      },
+      "inactive_minutes": {
+        "name": "Inaktiv seit"
+      },
+      "shutdown_at": {
+        "name": "Geplante Abschaltung"
+      }
+    }
+  }
+}

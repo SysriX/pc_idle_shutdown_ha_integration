@@ -1,0 +1,350 @@
+{
+  "title": "PC Idle Shutdown",
+  "config": {
+    "step": {
+      "user": {
+        "title": "PC Idle Shutdown",
+        "description": "HASS.Agent PCs found ({anzahl}): {rechner}\n\nAll PCs are shut down automatically when idle. Select the PCs that should stay on anyway. This can also be changed later per PC or under Configure - Exceptions.",
+        "data": {
+          "inaktiv_minuten": "Idle time before shutdown",
+          "warn_minuten": "Warning on the PC before (0 = none)",
+          "aktion": "Action",
+          "probelauf": "Dry run (report only, never shut down)",
+          "start_ausnahmen": "These PCs stay on (exceptions)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Already configured.",
+      "single_instance_allowed": "Already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "PC Idle Shutdown",
+        "menu_options": {
+          "einstellungen": "General settings",
+          "ausnahmen": "Exceptions: PCs that stay on",
+          "nicht_verwaltet": "Re-add removed PCs"
+        }
+      },
+      "einstellungen": {
+        "title": "General settings",
+        "description": "Applies to all PCs unless a PC has its own setting.",
+        "data": {
+          "aktiv": "Automatic shutdown enabled",
+          "probelauf": "Dry run (report only, never shut down)",
+          "inaktiv_minuten": "Idle time before shutdown",
+          "warn_minuten": "Warning on the PC before (0 = none)",
+          "aktion": "Action",
+          "kriterien": "What counts as in use",
+          "cpu_schwelle": "CPU load that counts as in use",
+          "cpu_minuten": "CPU average over",
+          "nach_start_minuten": "Grace time after boot",
+          "zeit_von": "Shutdown allowed from",
+          "zeit_bis": "Shutdown allowed until (same = always)",
+          "wochentage": "On these days",
+          "benachrichtigung": "Notify service (e.g. notify.mobile_app_phone, empty = none)",
+          "neue_abschalten": "Shut down newly found PCs automatically"
+        }
+      },
+      "ausnahmen": {
+        "title": "Exceptions",
+        "description": "Selected PCs keep running even when they exceed the idle time.",
+        "data": {
+          "ausnahmen": "PCs that stay on"
+        }
+      },
+      "nicht_verwaltet": {
+        "title": "Removed PCs",
+        "description": "These PCs were removed and are not watched. Selected ones are added again.",
+        "data": {
+          "ignoriert": "Add again"
+        }
+      }
+    }
+  },
+  "config_subentries": {
+    "pc": {
+      "entry_type": "PC",
+      "initiate_flow": {
+        "user": "Add PC",
+        "reconfigure": "Edit PC"
+      },
+      "step": {
+        "user": {
+          "title": "Add PC",
+          "data": {
+            "agent_unique_id": "HASS.Agent PC",
+            "abschalten": "Shut down when idle (off = always stays on)"
+          }
+        },
+        "menu": {
+          "title": "{titel}",
+          "description": "{uebersicht}",
+          "menu_options": {
+            "einstellungen": "Settings (pause entity, logic, action, times)",
+            "vorlage_anwenden": "Apply / remove template",
+            "bed_aktiv": "Add condition: rule active when …",
+            "bed_ausfuehren": "Add condition: run rule when …",
+            "bed_entfernen": "Remove conditions",
+            "speichern": "Save"
+          }
+        },
+        "einstellungen": {
+          "title": "{rechner}",
+          "data": {
+            "abschalten": "Shut down when idle (off = always stays on)",
+            "inaktiv_minuten": "Own idle time (0 = global, only without execute conditions)",
+            "aktion": "Action",
+            "eigene_kriterien": "Own criteria of the built-in logic",
+            "kriterien": "What counts as in use (own criteria only)",
+            "weitere_entitaeten": "Extra entities that keep the PC on (on/playing/number > 0)",
+            "aktiv_logik": "Rule active when …",
+            "ausfuehren_logik": "Run rule when …",
+            "warn_minuten": "Warning before the action (-1 = global)",
+            "pause_entitaet": "Pause entity: rule rests while this is on/true"
+          }
+        },
+        "vorlage_anwenden": {
+          "title": "Apply template",
+          "description": "The template's conditions are taken over with this PC's entities and can be edited afterwards.",
+          "data": {
+            "vorlage": "Template"
+          }
+        },
+        "bed_entitaet": {
+          "title": "{gruppe}",
+          "description": "Choose an entity (list of PC {rechner}, with current value).",
+          "data": {
+            "entitaet": "Entity"
+          }
+        },
+        "bed_fremd": {
+          "title": "Other entity",
+          "description": "This entity is the same for all PCs.",
+          "data": {
+            "entitaet": "Entity"
+          }
+        },
+        "bed_wert": {
+          "title": "{name}",
+          "description": "Current value: {aktuell} (kind: {art})",
+          "data": {
+            "op": "Comparison",
+            "wert": "Value"
+          }
+        },
+        "bed_entfernen": {
+          "title": "Remove conditions",
+          "data": {
+            "bedingungen": "Remove"
+          }
+        }
+      },
+      "error": {
+        "wert_fehlt": "This comparison needs a value."
+      },
+      "abort": {
+        "keine_rechner": "All HASS.Agent PCs are already added.",
+        "reconfigure_successful": "Saved."
+      }
+    },
+    "vorlage": {
+      "entry_type": "Template",
+      "initiate_flow": {
+        "user": "Add template",
+        "reconfigure": "Edit template"
+      },
+      "step": {
+        "menu": {
+          "title": "{titel}",
+          "description": "{uebersicht}",
+          "menu_options": {
+            "einstellungen": "Settings (name, reference PC, logic, automatic)",
+            "anwenden": "Apply to PCs",
+            "bed_aktiv": "Add condition: rule active when …",
+            "bed_ausfuehren": "Add condition: run rule when …",
+            "bed_entfernen": "Remove conditions",
+            "speichern": "Save"
+          }
+        },
+        "einstellungen": {
+          "title": "Template",
+          "description": "The reference PC provides the list of entities. The template only stores the kind of entity, so it fits every PC.",
+          "data": {
+            "name": "Name",
+            "referenz": "Reference PC",
+            "automatisch": "Apply automatically to every PC without a template (new ones too)",
+            "aktiv_logik": "Rule active when …",
+            "ausfuehren_logik": "Run rule when …",
+            "aktion": "Action",
+            "warn_minuten": "Warning before the action (-1 = global)",
+            "pause_entitaet": "Pause entity: rule rests while this is on/true"
+          }
+        },
+        "anwenden": {
+          "title": "Apply to PCs",
+          "description": "Applied when saving. Selected PCs get this template's conditions, even if they were edited.",
+          "data": {
+            "rechner": "PCs"
+          }
+        },
+        "bed_entitaet": {
+          "title": "{gruppe}",
+          "description": "Choose an entity (list of PC {rechner}, with current value).",
+          "data": {
+            "entitaet": "Entity"
+          }
+        },
+        "bed_fremd": {
+          "title": "Other entity",
+          "description": "This entity is the same for all PCs.",
+          "data": {
+            "entitaet": "Entity"
+          }
+        },
+        "bed_wert": {
+          "title": "{name}",
+          "description": "Current value: {aktuell} (kind: {art})",
+          "data": {
+            "op": "Comparison",
+            "wert": "Value"
+          }
+        },
+        "bed_entfernen": {
+          "title": "Remove conditions",
+          "data": {
+            "bedingungen": "Remove"
+          }
+        }
+      },
+      "error": {
+        "wert_fehlt": "This comparison needs a value."
+      },
+      "abort": {
+        "keine_agenten": "There are no HASS.Agent PCs yet.",
+        "reconfigure_successful": "Saved."
+      }
+    }
+  },
+  "selector": {
+    "aktion": {
+      "options": {
+        "global": "As set globally",
+        "shutdown": "Shut down",
+        "hibernate": "Hibernate",
+        "sleep": "Sleep"
+      }
+    },
+    "kriterien": {
+      "options": {
+        "eingabe": "Mouse/keyboard (idle time)",
+        "rdp": "Open remote desktop session",
+        "cpu": "CPU load above limit",
+        "medien": "Media playing",
+        "kamera_mikrofon": "Camera or microphone in use",
+        "anzeige_sperre": "App keeps the display on (video, presentation)",
+        "benutzer": "Somebody logged in (strict: logged-in PCs always stay on)"
+      }
+    },
+    "logik": {
+      "options": {
+        "alle": "all conditions met (AND)",
+        "eine": "any condition met (OR)"
+      }
+    },
+    "op": {
+      "options": {
+        "ge": "≥ greater or equal",
+        "gt": "> greater",
+        "le": "≤ less or equal",
+        "lt": "< less",
+        "eq": "= equal",
+        "ne": "≠ not equal",
+        "contains": "contains",
+        "not_contains": "does not contain",
+        "on": "is on / true",
+        "off": "is off / false",
+        "unavailable": "is unavailable",
+        "available": "is available"
+      }
+    },
+    "wochentage": {
+      "options": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "hub_cfg_enabled": {
+        "name": "Automatic shutdown"
+      },
+      "hub_cfg_dry_run": {
+        "name": "Dry run"
+      },
+      "cfg_enabled": {
+        "name": "Shut down when idle"
+      }
+    },
+    "number": {
+      "hub_cfg_idle_minutes": {
+        "name": "Idle time"
+      },
+      "hub_cfg_warn_minutes": {
+        "name": "Warning time"
+      },
+      "cfg_idle_minutes": {
+        "name": "Own idle time"
+      }
+    },
+    "button": {
+      "reset_timer": {
+        "name": "Reset timer"
+      },
+      "shutdown_now": {
+        "name": "Shut down now"
+      }
+    },
+    "binary_sensor": {
+      "in_use": {
+        "name": "In use"
+      }
+    },
+    "sensor": {
+      "hub_status": {
+        "name": "PCs online"
+      },
+      "status": {
+        "name": "Status",
+        "state": {
+          "aktiv": "In use",
+          "inaktiv": "Idle",
+          "warnung": "Shutting down soon",
+          "abgeschaltet": "Shut down",
+          "offline": "Offline",
+          "ausgenommen": "Stays on (exception)",
+          "pausiert": "Paused",
+          "ausserhalb_zeit": "Outside shutdown time",
+          "bereit": "Rule armed, waiting",
+          "regel_inaktiv": "Rule not active",
+          "regel_pausiert": "Rule paused"
+        }
+      },
+      "inactive_minutes": {
+        "name": "Idle for"
+      },
+      "shutdown_at": {
+        "name": "Planned shutdown"
+      }
+    }
+  }
+}
