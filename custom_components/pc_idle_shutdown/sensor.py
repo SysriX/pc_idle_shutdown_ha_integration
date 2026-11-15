@@ -10,7 +10,7 @@ from .const import (
     ST_ARMED, STATES,
 )
 from .entity import HubEntity, PcEntity
-from .manager import in_window, opt
+from .manager import active_windows, in_window, opt, windows
 from homeassistant.util import dt as dt_util
 
 
@@ -44,6 +44,9 @@ class HubStatus(HubEntity, SensorEntity):
             "aktiv": bool(opt(self.mgr.entry, OPT_ENABLED)),
             "probelauf": bool(opt(self.mgr.entry, OPT_DRY_RUN)),
             "im_zeitfenster": in_window(self.mgr.entry, dt_util.now()),
+            "aktive_zeitfenster": [w.get("name") for w in active_windows(self.mgr.entry, dt_util.now())],
+            "zeitfenster": [{"name": w.get("name"), "aktiv": w.get("aktiv", True), "tage": w.get("tage"),
+                             "von": w.get("von"), "bis": w.get("bis")} for w in windows(self.mgr.entry)],
             "rechner": {p.name: p.status for p in pcs},
             "ausgenommen": [p.name for p in pcs if p.status == ST_EXEMPT or not self.mgr.enabled(p)],
             "in_benutzung": [p.name for p in pcs if p.status == ST_ACTIVE],

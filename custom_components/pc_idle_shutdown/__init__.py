@@ -17,7 +17,7 @@ from .const import (
     PC_ANGEPASST, PC_ENABLED, PC_EXEC, PC_EXEC_LOGIC, PC_EXTRA, PC_IDLE_MIN, PC_OWN_CRITERIA,
     PC_PAUSE, PC_RULE_ACTIVE, PC_RULE_LOGIC, PC_TEMPLATE, PC_WARN, PLATFORMS, SUBENTRY_PC,
 )
-from .manager import IdleShutdownManager, opt
+from .manager import IdleShutdownManager, opt, windows
 from .rules import sync_templates
 
 _LOGGER = logging.getLogger(__name__)
@@ -67,6 +67,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: IdleConfigEntry) -> bool
 
     mgr = IdleShutdownManager(hass, entry)
     mgr.known = set(pc_subentries(entry))           # type: ignore[attr-defined]
+    mgr.known_windows = {(w.get("id"), w.get("name")) for w in windows(entry)}  # type: ignore[attr-defined]
     entry.runtime_data = mgr
     await mgr.async_start()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -95,7 +96,11 @@ async def _async_updated(hass: HomeAssistant, entry: IdleConfigEntry) -> None:
         # a PC the user deleted stays unmanaged (is not re-created by discovery)
         ignored = sorted(set(opt(entry, OPT_IGNORED) or []) | (removed & set(agent_entries(hass))))
         hass.config_entries.async_update_entry(entry, options={**entry.options, OPT_IGNORED: ignored})
-    if added or removed:
+    wins = {(w.get("id"), w.get("name")) for w in windows(entry)}
+    wins_changed = wins != mgr.known_windows         # type: ignore[attr-defined]
+    mgr.known_windows = wins                         # type: ignore[attr-defined]
+    if added or removed or wins_changed:
+        # PCs or time windows added/removed -> entities change
         hass.config_entries.async_schedule_reload(entry.entry_id)
         return
     # template changed / PC without template -> take over (fires this listener again)

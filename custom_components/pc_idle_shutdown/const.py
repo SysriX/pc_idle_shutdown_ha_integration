@@ -26,6 +26,7 @@ OPT_BOOT_GRACE = "nach_start_minuten"
 OPT_FROM = "zeit_von"
 OPT_TO = "zeit_bis"
 OPT_DAYS = "wochentage"
+OPT_WINDOWS = "zeitfenster"            # list of {id, name, von, bis, tage, aktiv}; none enabled = always
 OPT_NOTIFY = "benachrichtigung"        # optional notify service for HA (e.g. notify.mobile_app_x)
 OPT_IGNORED = "ignoriert"              # agent unique_ids the user removed (not managed)
 OPT_NEW_ENABLED = "neue_abschalten"    # new PCs are switched to auto shutdown
@@ -44,6 +45,7 @@ DEFAULTS: dict = {
     OPT_DAYS: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
     OPT_NOTIFY: "",
     OPT_IGNORED: [],
+    OPT_WINDOWS: [],
     OPT_NEW_ENABLED: True,
 }
 

@@ -20,11 +20,15 @@
     }
   },
   "options": {
+    "error": {
+      "keine_tage": "Mindestens einen Wochentag wählen."
+    },
     "step": {
       "init": {
         "title": "PC-Leerlauf-Abschaltung",
         "menu_options": {
           "einstellungen": "Allgemeine Einstellungen",
+          "zeiten": "Zeitfenster: wann die Regeln aktiv sind (für alle Rechner)",
           "ausnahmen": "Ausnahmen: Rechner, die anbleiben",
           "nicht_verwaltet": "Entfernte Rechner wieder aufnehmen"
         }
@@ -42,11 +46,52 @@
           "cpu_schwelle": "CPU-Last, ab der der Rechner als benutzt gilt",
           "cpu_minuten": "CPU-Mittelwert über",
           "nach_start_minuten": "Schonzeit nach dem Hochfahren",
-          "zeit_von": "Abschalten erlaubt von",
-          "zeit_bis": "Abschalten erlaubt bis (gleich = immer)",
-          "wochentage": "An diesen Tagen",
           "benachrichtigung": "Benachrichtigung an (z. B. notify.mobile_app_iphone, leer = keine)",
           "neue_abschalten": "Neu erkannte Rechner automatisch abschalten"
+        }
+      },
+      "zeiten": {
+        "title": "Zeitfenster",
+        "description": "Die Regeln aller Rechner sind nur in den eingeschalteten Zeitfenstern aktiv. Ist kein Zeitfenster eingeschaltet, gelten sie rund um die Uhr. Jedes Zeitfenster hat zusätzlich einen eigenen Schalter.\n\n{uebersicht}",
+        "menu_options": {
+          "zeit_neu": "Zeitfenster hinzufügen",
+          "zeit_bearbeiten": "Zeitfenster bearbeiten",
+          "zeit_loeschen": "Zeitfenster löschen",
+          "zeit_speichern": "Speichern"
+        }
+      },
+      "zeit_neu": {
+        "title": "Zeitfenster hinzufügen",
+        "description": "Bis vor Von = über Mitternacht (gehört zum Starttag). Von = Bis = ganzer Tag.",
+        "data": {
+          "name": "Name",
+          "aktiv": "Eingeschaltet",
+          "tage": "Wochentage",
+          "von": "Von",
+          "bis": "Bis"
+        }
+      },
+      "zeit_bearbeiten": {
+        "title": "Zeitfenster bearbeiten",
+        "data": {
+          "fenster": "Zeitfenster"
+        }
+      },
+      "zeit_form": {
+        "title": "{name}",
+        "description": "Bis vor Von = über Mitternacht (gehört zum Starttag). Von = Bis = ganzer Tag.",
+        "data": {
+          "name": "Name",
+          "aktiv": "Eingeschaltet",
+          "tage": "Wochentage",
+          "von": "Von",
+          "bis": "Bis"
+        }
+      },
+      "zeit_loeschen": {
+        "title": "Zeitfenster löschen",
+        "data": {
+          "fenster": "Löschen"
         }
       },
       "ausnahmen": {

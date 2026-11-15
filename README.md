@@ -11,7 +11,7 @@ Automatically shuts down (or hibernates / sleeps) Windows PCs that are no longer
   entities that keep the PC on (e.g. a backup job sensor).
 - **Warning** – a notification on the PC some minutes before; any activity cancels the shutdown (a pending
   Windows shutdown is aborted too).
-- **Dry run**, time window and weekdays, grace time after boot, optional notify service for Home Assistant.
+- **Dry run**, several time windows (shared by all PCs, each with its own switch), grace time after boot, optional notify service for Home Assistant.
 
 ## Rules and templates
 
@@ -31,6 +31,16 @@ Instead of the built-in idle logic you can build your own rules from the entitie
 - **Per PC** (*Edit PC*): apply or remove a template, add/remove conditions, choose a **pause entity** – the rule
   rests while it is on/true (e.g. an `input_boolean`).
 - Without *run* conditions the built-in idle logic below decides, the rule only arms it.
+
+## Time windows
+
+*Configure → Time windows* defines when the rules are active – for **all PCs at once**:
+
+- Any number of windows, each with name, weekdays, from and until (e.g. *Mon–Thu 18:00–07:00*, *Fri 15:00–07:00*,
+  *Sat/Sun whole day*). Until before from = over midnight (belongs to the start day), from = until = whole day.
+- Every window has its own switch `switch.haus_sys_idle_shutdown_cfg_window_<name>` to turn it off temporarily.
+- Rules only act inside an enabled window. With no window enabled they apply around the clock.
+- The hub sensor shows `zeitfenster`, `aktive_zeitfenster` and `im_zeitfenster`.
 
 ## What counts as "in use" (built-in logic)
 

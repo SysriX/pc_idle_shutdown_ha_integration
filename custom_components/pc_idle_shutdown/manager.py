@@ -21,7 +21,7 @@ from .const import (
     CRIT_USERS, DEFAULT_CRITERIA, DEFAULTS, EVENT, KEY_CAM, KEY_CPU, KEY_IDLE, KEY_LOCKED,
     KEY_MIC, KEY_RDP, KEY_SESSION, KEY_SLEEP_BLOCKED, KEY_UPTIME, KEY_USERS, OPT_ACTION,
     OPT_BOOT_GRACE, OPT_CPU_LIMIT, OPT_CPU_MIN, OPT_CRITERIA, OPT_DAYS, OPT_DRY_RUN, OPT_ENABLED,
-    OPT_FROM, OPT_IDLE_MIN, OPT_NOTIFY, OPT_TO, OPT_WARN_MIN, PC_ACTION, PC_AGENT, PC_CRITERIA,
+    OPT_FROM, OPT_IDLE_MIN, OPT_NOTIFY, OPT_TO, OPT_WARN_MIN, OPT_WINDOWS, PC_ACTION, PC_AGENT, PC_CRITERIA,
     PC_ENABLED, PC_EXEC, PC_EXEC_LOGIC, PC_EXTRA, PC_IDLE_MIN, PC_OWN_CRITERIA, PC_PAUSE,
     PC_RULE_ACTIVE, PC_RULE_LOGIC, PC_WARN, ROOM_CODES, SIGNAL_UPDATE, ST_ACTIVE, ST_ARMED,
     ST_EXEMPT, ST_IDLE, ST_NOT_ARMED, ST_OFFLINE, ST_OUTSIDE, ST_PAUSED, ST_RULE_PAUSED, ST_SHUTDOWN,
@@ -67,11 +67,22 @@ def _parse_time(text: str) -> time:
         return time(0, 0)
 
 
-def in_window(entry: ConfigEntry, now: datetime) -> bool:
+def windows(entry: ConfigEntry) -> list[dict]:
+    """Time windows (shared by all PCs). Older single from/to/days setting is read as one window."""
+    if OPT_WINDOWS in entry.options:
+        return list(entry.options.get(OPT_WINDOWS) or [])
     days = opt(entry, OPT_DAYS) or WEEKDAYS
-    t_from, t_to = _parse_time(opt(entry, OPT_FROM)), _parse_time(opt(entry, OPT_TO))
+    t_from, t_to = str(opt(entry, OPT_FROM))[:5], str(opt(entry, OPT_TO))[:5]
+    if t_from == t_to and set(days) == set(WEEKDAYS):
+        return []
+    return [{"id": "alt", "name": "Zeitfenster", "von": t_from, "bis": t_to, "tage": list(days), "aktiv": True}]
+
+
+def window_matches(win: dict, now: datetime) -> bool:
+    days = win.get("tage") or []
+    t_from, t_to = _parse_time(win.get("von")), _parse_time(win.get("bis"))
     cur = now.time()
-    if t_from == t_to:
+    if t_from == t_to:                         # whole day
         return WEEKDAYS[now.weekday()] in days
     if t_from < t_to:
         return t_from <= cur < t_to and WEEKDAYS[now.weekday()] in days
@@ -81,6 +92,18 @@ def in_window(entry: ConfigEntry, now: datetime) -> bool:
     if cur < t_to:
         return WEEKDAYS[(now.weekday() - 1) % 7] in days
     return False
+
+
+def active_windows(entry: ConfigEntry, now: datetime) -> list[dict]:
+    return [w for w in windows(entry) if w.get("aktiv", True) and window_matches(w, now)]
+
+
+def in_window(entry: ConfigEntry, now: datetime) -> bool:
+    """True if rules may act now: inside one enabled window, or no window is enabled at all."""
+    enabled = [w for w in windows(entry) if w.get("aktiv", True)]
+    if not enabled:
+        return True
+    return any(window_matches(w, now) for w in enabled)
 
 
 @dataclass
@@ -153,6 +176,12 @@ class IdleShutdownManager:
         sub = self.entry.subentries.get(subentry_id)
         if sub is not None:
             self.hass.config_entries.async_update_subentry(self.entry, sub, data={**sub.data, **changes})
+
+    @callback
+    def set_window(self, win_id: str, **changes: Any) -> None:
+        """Change one time window (e.g. switch it on/off)."""
+        wins = [dict(w, **changes) if w.get("id") == win_id else dict(w) for w in windows(self.entry)]
+        self.set_opt(**{OPT_WINDOWS: wins})
 
     @callback
     def set_opt(self, **changes: Any) -> None:

@@ -1,6 +1,7 @@
 """Config flow, options flow and PC subentry flow."""
 from __future__ import annotations
 
+import uuid
 from typing import Any
 
 import voluptuous as vol
@@ -16,13 +17,14 @@ from homeassistant.helpers.selector import (
 
 from .const import (
     ACTIONS, CRITERIA, DEFAULT_CRITERIA, DEFAULTS, DOMAIN, OPT_ACTION, OPT_BOOT_GRACE, OPT_CPU_LIMIT,
-    OPT_CPU_MIN, OPT_CRITERIA, OPT_DAYS, OPT_DRY_RUN, OPT_ENABLED, OPT_FROM, OPT_IDLE_MIN, OPT_IGNORED,
-    OPT_NEW_ENABLED, OPT_NOTIFY, OPT_TO, OPT_WARN_MIN, PC_ACTION, PC_AGENT, PC_CRITERIA, PC_ENABLED,
+    OPT_CPU_MIN, OPT_CRITERIA, OPT_DRY_RUN, OPT_ENABLED, OPT_IDLE_MIN, OPT_IGNORED,
+    OPT_NEW_ENABLED, OPT_NOTIFY, OPT_WARN_MIN, OPT_WINDOWS, PC_ACTION, PC_AGENT, PC_CRITERIA, PC_ENABLED,
     PC_ANGEPASST, PC_EXEC, PC_EXEC_LOGIC, PC_EXTRA, PC_IDLE_MIN, PC_OWN_CRITERIA, PC_PAUSE,
     PC_RULE_ACTIVE, PC_RULE_LOGIC, PC_TEMPLATE, PC_WARN, SUBENTRY_PC, SUBENTRY_TEMPLATE, TPL_AUTO, TPL_REF,
     WEEKDAYS,
 )
 from . import rules as R
+from .manager import windows
 
 START_EXEMPT = "start_ausnahmen"
 EXEMPT = "ausnahmen"
@@ -57,9 +59,6 @@ def _global_schema(o: dict) -> vol.Schema:
         vol.Required(OPT_CPU_LIMIT, default=g[OPT_CPU_LIMIT]): _num(1, 100, "%"),
         vol.Required(OPT_CPU_MIN, default=g[OPT_CPU_MIN]): _num(1, 60),
         vol.Required(OPT_BOOT_GRACE, default=g[OPT_BOOT_GRACE]): _num(0, 240),
-        vol.Required(OPT_FROM, default=g[OPT_FROM]): TimeSelector(),
-        vol.Required(OPT_TO, default=g[OPT_TO]): TimeSelector(),
-        vol.Required(OPT_DAYS, default=g[OPT_DAYS]): _select(WEEKDAYS, "wochentage", True, False),
         vol.Optional(OPT_NOTIFY, description={"suggested_value": g[OPT_NOTIFY]}): TextSelector(),
         vol.Required(OPT_NEW_ENABLED, default=g[OPT_NEW_ENABLED]): BooleanSelector(),
     })
@@ -93,8 +92,7 @@ class IdleShutdownConfigFlow(ConfigFlow, domain=DOMAIN):
         agents = _agents(self.hass)
         if user_input is not None:
             exempt = user_input.pop(START_EXEMPT, [])
-            user_input[OPT_FROM] = _clean_time(user_input.get(OPT_FROM))
-            user_input[OPT_TO] = _clean_time(user_input.get(OPT_TO))
+            user_input[OPT_WINDOWS] = []
             return self.async_create_entry(title="PC-Leerlauf-Abschaltung",
                                            data={START_EXEMPT: exempt}, options=user_input)
         schema = vol.Schema({
@@ -111,18 +109,105 @@ class IdleShutdownConfigFlow(ConfigFlow, domain=DOMAIN):
 
 class IdleShutdownOptionsFlow(OptionsFlow):
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        menu = ["einstellungen", EXEMPT]
+        menu = ["einstellungen", "zeiten", EXEMPT]
         if self.config_entry.options.get(OPT_IGNORED):
             menu.append("nicht_verwaltet")
         return self.async_show_menu(step_id="init", menu_options=menu)
 
     async def async_step_einstellungen(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
-            user_input[OPT_FROM] = _clean_time(user_input.get(OPT_FROM))
-            user_input[OPT_TO] = _clean_time(user_input.get(OPT_TO))
             user_input.setdefault(OPT_NOTIFY, "")
             return self.async_create_entry(data={**self.config_entry.options, **user_input})
         return self.async_show_form(step_id="einstellungen", data_schema=_global_schema(dict(self.config_entry.options)))
+
+    # ------------------------------------------------------------ time windows
+    _wins: list[dict] | None = None
+    _edit: str | None = None
+
+    def _windows(self) -> list[dict]:
+        if self._wins is None:
+            self._wins = [dict(w) for w in windows(self.config_entry)]
+        return self._wins
+
+    def _wins_overview(self) -> str:
+        wins = self._windows()
+        if not wins:
+            return "Keine Zeitfenster – die Regeln gelten rund um die Uhr."
+        names = dict(zip(WEEKDAYS, ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]))
+        lines = []
+        for w in sorted(wins, key=lambda w: (w.get("name") or "").lower()):
+            days = ", ".join(names[d] for d in WEEKDAYS if d in (w.get("tage") or [])) or "keine Tage"
+            span = "ganztägig" if w.get("von") == w.get("bis") else f"{w.get('von')}–{w.get('bis')} Uhr"
+            lines.append(f"- {'✅' if w.get('aktiv', True) else '⏸️'} **{w.get('name')}**: {days}, {span}")
+        if not any(w.get("aktiv", True) for w in wins):
+            lines.append("\nAlle Zeitfenster sind aus – die Regeln gelten rund um die Uhr.")
+        return "\n".join(lines)
+
+    async def async_step_zeiten(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        menu = ["zeit_neu"]
+        if self._windows():
+            menu += ["zeit_bearbeiten", "zeit_loeschen"]
+        menu.append("zeit_speichern")
+        return self.async_show_menu(step_id="zeiten", menu_options=menu,
+                                    description_placeholders={"uebersicht": self._wins_overview()})
+
+    def _win_schema(self, w: dict) -> vol.Schema:
+        return vol.Schema({
+            vol.Required("name", default=w.get("name", "")): TextSelector(),
+            vol.Required("aktiv", default=w.get("aktiv", True)): BooleanSelector(),
+            vol.Required("tage", default=w.get("tage", WEEKDAYS[:5])): _select(WEEKDAYS, "wochentage", True, False),
+            vol.Required("von", default=w.get("von", "07:00")): TimeSelector(),
+            vol.Required("bis", default=w.get("bis", "22:00")): TimeSelector(),
+        })
+
+    def _win_from_input(self, user_input: dict, win_id: str) -> dict:
+        return {"id": win_id, "name": (user_input.get("name") or "Zeitfenster").strip(),
+                "aktiv": bool(user_input.get("aktiv", True)), "tage": list(user_input.get("tage") or []),
+                "von": _clean_time(user_input.get("von")), "bis": _clean_time(user_input.get("bis"))}
+
+    async def async_step_zeit_neu(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            if not user_input.get("tage"):
+                return self.async_show_form(step_id="zeit_neu", data_schema=self._win_schema(user_input),
+                                            errors={"tage": "keine_tage"})
+            self._windows().append(self._win_from_input(user_input, uuid.uuid4().hex[:8]))
+            return await self.async_step_zeiten()
+        n = len(self._windows()) + 1
+        return self.async_show_form(step_id="zeit_neu", data_schema=self._win_schema({"name": f"Zeitfenster {n}"}))
+
+    async def async_step_zeit_bearbeiten(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._edit = user_input["fenster"]
+            return await self.async_step_zeit_form()
+        schema = vol.Schema({vol.Required("fenster"): _pc_select(
+            {w["id"]: w.get("name") or w["id"] for w in self._windows()}, multiple=False)})
+        return self.async_show_form(step_id="zeit_bearbeiten", data_schema=schema)
+
+    async def async_step_zeit_form(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        wins = self._windows()
+        cur = next((w for w in wins if w["id"] == self._edit), None)
+        if cur is None:
+            return await self.async_step_zeiten()
+        if user_input is not None:
+            if not user_input.get("tage"):
+                return self.async_show_form(step_id="zeit_form", data_schema=self._win_schema(user_input),
+                                            errors={"tage": "keine_tage"})
+            wins[wins.index(cur)] = self._win_from_input(user_input, cur["id"])
+            return await self.async_step_zeiten()
+        return self.async_show_form(step_id="zeit_form", data_schema=self._win_schema(cur),
+                                    description_placeholders={"name": cur.get("name", "")})
+
+    async def async_step_zeit_loeschen(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            drop = set(user_input.get("fenster", []))
+            self._wins = [w for w in self._windows() if w["id"] not in drop]
+            return await self.async_step_zeiten()
+        schema = vol.Schema({vol.Optional("fenster", default=[]): _pc_select(
+            {w["id"]: w.get("name") or w["id"] for w in self._windows()})})
+        return self.async_show_form(step_id="zeit_loeschen", data_schema=schema)
+
+    async def async_step_zeit_speichern(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        return self.async_create_entry(data={**self.config_entry.options, OPT_WINDOWS: self._windows()})
 
     async def async_step_ausnahmen(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """The list of PCs that stay on even when idle."""

@@ -20,11 +20,15 @@
     }
   },
   "options": {
+    "error": {
+      "keine_tage": "Choose at least one weekday."
+    },
     "step": {
       "init": {
         "title": "PC Idle Shutdown",
         "menu_options": {
           "einstellungen": "General settings",
+          "zeiten": "Time windows: when the rules are active (all PCs)",
           "ausnahmen": "Exceptions: PCs that stay on",
           "nicht_verwaltet": "Re-add removed PCs"
         }
@@ -42,11 +46,52 @@
           "cpu_schwelle": "CPU load that counts as in use",
           "cpu_minuten": "CPU average over",
           "nach_start_minuten": "Grace time after boot",
-          "zeit_von": "Shutdown allowed from",
-          "zeit_bis": "Shutdown allowed until (same = always)",
-          "wochentage": "On these days",
           "benachrichtigung": "Notify service (e.g. notify.mobile_app_phone, empty = none)",
           "neue_abschalten": "Shut down newly found PCs automatically"
+        }
+      },
+      "zeiten": {
+        "title": "Time windows",
+        "description": "The rules of all PCs are only active inside the enabled time windows. With no window enabled they apply around the clock. Each window also has its own switch.\n\n{uebersicht}",
+        "menu_options": {
+          "zeit_neu": "Add time window",
+          "zeit_bearbeiten": "Edit time window",
+          "zeit_loeschen": "Delete time windows",
+          "zeit_speichern": "Save"
+        }
+      },
+      "zeit_neu": {
+        "title": "Add time window",
+        "description": "Until before from = over midnight (belongs to the start day). From = until = whole day.",
+        "data": {
+          "name": "Name",
+          "aktiv": "Enabled",
+          "tage": "Weekdays",
+          "von": "From",
+          "bis": "Until"
+        }
+      },
+      "zeit_bearbeiten": {
+        "title": "Edit time window",
+        "data": {
+          "fenster": "Time window"
+        }
+      },
+      "zeit_form": {
+        "title": "{name}",
+        "description": "Until before from = over midnight (belongs to the start day). From = until = whole day.",
+        "data": {
+          "name": "Name",
+          "aktiv": "Enabled",
+          "tage": "Weekdays",
+          "von": "From",
+          "bis": "Until"
+        }
+      },
+      "zeit_loeschen": {
+        "title": "Delete time windows",
+        "data": {
+          "fenster": "Delete"
         }
       },
       "ausnahmen": {
