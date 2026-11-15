@@ -11,5 +11,5 @@
   "issue_tracker": "https://github.com/SysriX/pc_idle_shutdown_ha_integration/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "1.2.0"
+  "version": "1.3.0"
 }

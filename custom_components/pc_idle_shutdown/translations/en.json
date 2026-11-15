@@ -331,13 +331,13 @@
   "entity": {
     "switch": {
       "hub_cfg_enabled": {
-        "name": "Automatic shutdown"
+        "name": "Enabled"
       },
       "hub_cfg_dry_run": {
         "name": "Dry run"
       },
       "cfg_enabled": {
-        "name": "Shut down when idle"
+        "name": "Shut down automatically"
       }
     },
     "number": {
@@ -388,7 +388,7 @@
         "name": "Idle for"
       },
       "shutdown_at": {
-        "name": "Planned shutdown"
+        "name": "Planned at"
       }
     }
   }

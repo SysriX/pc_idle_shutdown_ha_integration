@@ -11,6 +11,12 @@ from homeassistant.helpers.entity import Entity
 from .const import DOMAIN, SIGNAL_UPDATE
 from .manager import IdleShutdownManager, PcState
 
+# entity_id prefix of everything this integration creates (no room / house prefix on purpose)
+PREFIX = "pc_auto_idle_off"
+# unique_id key -> entity_id suffix (unique_ids stay stable, only the ids read better)
+HUB_SUFFIX = {"status": "online_count"}
+PC_SUFFIX = {"inactive_minutes": "idle_minutes"}
+
 _UML = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"})
 
 
@@ -40,11 +46,10 @@ class HubEntity(BaseIdleEntity):
         super().__init__(mgr)
         self._attr_unique_id = f"{mgr.entry.entry_id}_hub_{key}"
         self._attr_translation_key = f"hub_{key}"
-        # naming scheme <raum>_<gewerk>_<funktion>_cfg_<param>
-        self.entity_id = f"{platform}.haus_sys_idle_shutdown{'' if key == 'status' else '_' + key}"
+        self.entity_id = f"{platform}.{PREFIX}_{HUB_SUFFIX.get(key, key)}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, f"{mgr.entry.entry_id}_hub")},
-            name="PC-Leerlauf-Abschaltung", manufacturer="SysriX", model="Idle Shutdown")
+            name="PC-Abschaltung", manufacturer="SysriX", model="Idle Shutdown")
 
 
 class PcEntity(BaseIdleEntity):
@@ -57,11 +62,11 @@ class PcEntity(BaseIdleEntity):
         self._attr_translation_key = key
         mgr._resolve(pc)
         objekt = slug(pc.name)
-        self.entity_id = f"{platform}.{pc.room}_sys_idle_shutdown_{objekt}{'' if key == 'status' else '_' + key}"
+        self.entity_id = f"{platform}.{PREFIX}_{objekt}_{PC_SUFFIX.get(key, key)}"
         dev = mgr.agent_device(pc) if pc.agent_entry_id else None
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, pc.serial)},
-            name=f"{pc.name} Leerlauf", manufacturer="SysriX", model="Idle Shutdown",
+            name=f"Abschaltung {pc.name}", manufacturer="SysriX", model="Idle Shutdown",
             suggested_area=None if dev is None else _area_name(mgr, dev.area_id))
 
     @property

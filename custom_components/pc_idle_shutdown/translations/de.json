@@ -331,13 +331,13 @@
   "entity": {
     "switch": {
       "hub_cfg_enabled": {
-        "name": "Automatische Abschaltung"
+        "name": "Aktiv"
       },
       "hub_cfg_dry_run": {
         "name": "Probelauf"
       },
       "cfg_enabled": {
-        "name": "Bei Inaktivität abschalten"
+        "name": "Automatisch abschalten"
       }
     },
     "number": {
@@ -388,7 +388,7 @@
         "name": "Inaktiv seit"
       },
       "shutdown_at": {
-        "name": "Geplante Abschaltung"
+        "name": "Geplant um"
       }
     }
   }

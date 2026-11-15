@@ -8,7 +8,7 @@ from homeassistant.helpers import entity_registry as er
 from .const import OPT_DRY_RUN, OPT_ENABLED, PC_ENABLED
 from homeassistant.util import dt as dt_util
 
-from .entity import HubEntity, PcEntity, slug
+from .entity import PREFIX, HubEntity, PcEntity, slug
 from .manager import opt, window_matches, windows
 
 
@@ -79,7 +79,7 @@ class WindowSwitch(HubEntity, SwitchEntity):
         self._win_id = win["id"]
         self._attr_translation_key = None
         self._attr_name = f"Zeitfenster {win.get('name') or win['id']}"
-        self.entity_id = f"switch.haus_sys_idle_shutdown_cfg_window_{slug(win.get('name') or win['id'])}"
+        self.entity_id = f"switch.{PREFIX}_window_{slug(win.get('name') or win['id'])}_cfg_enabled"
 
     def _win(self) -> dict | None:
         return next((w for w in windows(self.mgr.entry) if w.get("id") == self._win_id), None)

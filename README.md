@@ -38,7 +38,7 @@ Instead of the built-in idle logic you can build your own rules from the entitie
 
 - Any number of windows, each with name, weekdays, from and until (e.g. *Mon–Thu 18:00–07:00*, *Fri 15:00–07:00*,
   *Sat/Sun whole day*). Until before from = over midnight (belongs to the start day), from = until = whole day.
-- Every window has its own switch `switch.haus_sys_idle_shutdown_cfg_window_<name>` to turn it off temporarily.
+- Every window has its own switch `switch.pc_auto_idle_off_window_<name>_cfg_enabled` to turn it off temporarily.
 - Rules only act inside an enabled window. With no window enabled they apply around the clock.
 - The hub sensor shows `zeitfenster`, `aktive_zeitfenster` and `im_zeitfenster`.
 
@@ -64,12 +64,31 @@ Requires Home Assistant 2025.6 or newer and the HASS.Agent .NET10 integration.
 
 ## Entities
 
-House-wide device *PC-Leerlauf-Abschaltung*: `switch.haus_sys_idle_shutdown_cfg_enabled` (master),
-`switch.haus_sys_idle_shutdown_cfg_dry_run`, `number.haus_sys_idle_shutdown_cfg_idle_minutes`,
-`number.haus_sys_idle_shutdown_cfg_warn_minutes`, `sensor.haus_sys_idle_shutdown` (PCs online, lists in attributes).
+All entity IDs start with `pc_auto_idle_off` (no room prefix).
 
-Per PC (`<room>_sys_idle_shutdown_<pc>`): status sensor, *idle for*, *planned shutdown*, *in use* binary sensor,
-*shut down when idle* switch, *own idle time* number, *reset timer* and *shut down now* buttons.
+House-wide device *PC-Abschaltung*:
+
+| Entity | Meaning |
+|---|---|
+| `switch.pc_auto_idle_off_cfg_enabled` | master switch |
+| `switch.pc_auto_idle_off_cfg_dry_run` | dry run |
+| `number.pc_auto_idle_off_cfg_idle_minutes` | idle time (built-in logic) |
+| `number.pc_auto_idle_off_cfg_warn_minutes` | warning time |
+| `sensor.pc_auto_idle_off_online_count` | PCs online, lists and time windows in attributes |
+| `switch.pc_auto_idle_off_window_<name>_cfg_enabled` | one per time window |
+
+Per PC, device *Abschaltung &lt;PC&gt;* (`<pc>` = PC name, e.g. `xcs_desktop`):
+
+| Entity | Meaning |
+|---|---|
+| `sensor.pc_auto_idle_off_<pc>_status` | status, conditions in attributes |
+| `sensor.pc_auto_idle_off_<pc>_idle_minutes` | idle for |
+| `sensor.pc_auto_idle_off_<pc>_shutdown_at` | planned shutdown |
+| `binary_sensor.pc_auto_idle_off_<pc>_in_use` | in use |
+| `switch.pc_auto_idle_off_<pc>_cfg_enabled` | shut down automatically (off = exception) |
+| `number.pc_auto_idle_off_<pc>_cfg_idle_minutes` | own idle time (0 = global) |
+| `button.pc_auto_idle_off_<pc>_reset_timer` | reset timer |
+| `button.pc_auto_idle_off_<pc>_shutdown_now` | shut down now |
 
 Event `pc_idle_shutdown_event` with `type` = `warning` | `shutdown` | `cancelled` for your own automations.
 
