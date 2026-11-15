@@ -1,5 +1,7 @@
 # PC Idle Shutdown for Home Assistant
 
+![PC Idle Shutdown preview](docs/images/preview.png)
+
 Automatically shuts down (or hibernates / sleeps) Windows PCs that are no longer in use, based on the sensors of
 [HASS.Agent .NET10](https://github.com/v1k70rk4/HASS.Agent.NET10-Integration).
 
